@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 void main() {
   runApp(const MyApp());
@@ -80,9 +84,28 @@ class _PixabayPageState extends State<PixabayPage> {
           Map<String, dynamic> image = imageList[index];
           // プレビュー用の画像データがあるURLは previewURL の value に入っています。
           // URLをつかった画像表示は Image.network(表示したいURL) で実装できます。
+
           return InkWell(
-              onTap: () {
-                print(image['likes']);
+              onTap: () async {
+                // まずは一時保存に使えるフォルダ情報を取得します。
+                // Future 型なので await で待ちます
+                Directory dir = await getTemporaryDirectory();
+
+                Response response = await Dio().get(
+                  // previewURL は荒いためより高解像度の webformatURL から画像をダウンロードします。
+                  image['webformatURL'],
+                  options: Options(
+                    // 画像をダウンロードするときは ResponseType.bytes を指定します。
+                    responseType: ResponseType.bytes,
+                  ),
+                );
+
+                // フォルダの中に image.png という名前でファイルを作り、そこに画像データを書き込みます。
+                File imageFile = await File('${dir.path}/image.png')
+                    .writeAsBytes(response.data);
+
+                // path を指定すると share できます。
+                await Share.shareFiles([imageFile.path]);
               },
               child: Stack(
                 // StackFit.expand を与えると領域いっぱいに広がろうとします。
