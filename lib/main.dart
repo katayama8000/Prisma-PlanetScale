@@ -80,37 +80,43 @@ class _PixabayPageState extends State<PixabayPage> {
           Map<String, dynamic> image = imageList[index];
           // プレビュー用の画像データがあるURLは previewURL の value に入っています。
           // URLをつかった画像表示は Image.network(表示したいURL) で実装できます。
-          return Stack(
-            // StackFit.expand を与えると領域いっぱいに広がろうとします。
-            fit: StackFit.expand,
-            children: [
-              Image.network(
-                image['previewURL'],
-                // BoxFit.cover を与えると領域いっぱいに広がろうとします。
-                fit: BoxFit.cover,
-              ),
-              Align(
-                // 左上ではなく右下に表示するようにします。
-                alignment: Alignment.bottomRight,
-                child: Container(
-                  child: Row(
-                    // MainAxisSize.min を与えると必要最小限のサイズに縮小します。
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 何の数字かわからないので 👍 アイコンを追加します。
-                      const Icon(
-                        Icons.thumb_up_alt_outlined,
-                        size: 14,
-                        color: Colors.white,
-                      ),
-                      Text('${image['likes']}',
-                          style: TextStyle(fontSize: 14, color: Colors.white)),
-                    ],
+          return InkWell(
+              onTap: () {
+                print(image['likes']);
+              },
+              child: Stack(
+                // StackFit.expand を与えると領域いっぱいに広がろうとします。
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    image['previewURL'],
+                    // BoxFit.cover を与えると領域いっぱいに広がろうとします。
+                    fit: BoxFit.cover,
                   ),
-                ),
-              ),
-            ],
-          );
+                  Align(
+                    // 左上ではなく右下に表示するようにします。
+                    alignment: Alignment.bottomRight,
+
+                    child: Container(
+                      child: Row(
+                        // MainAxisSize.min を与えると必要最小限のサイズに縮小します。
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 何の数字かわからないので 👍 アイコンを追加します。
+                          const Icon(
+                            Icons.thumb_up_alt_outlined,
+                            size: 14,
+                            color: Color.fromARGB(255, 190, 228, 19),
+                          ),
+                          Text('${image['likes']}',
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.yellow)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ));
         },
       ),
     );
