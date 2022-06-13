@@ -115,38 +115,52 @@ class _PixabayPageState extends State<PixabayPage> {
               onTap: () async {
                 shareImage(image['webformatURL']);
               },
-              child: Stack(
-                // StackFit.expand を与えると領域いっぱいに広がろうとします。
-                fit: StackFit.expand,
-                children: [
-                  Image.network(
-                    image['previewURL'],
-                    // BoxFit.cover を与えると領域いっぱいに広がろうとします。
-                    fit: BoxFit.cover,
-                  ),
-                  Align(
-                    // 左上ではなく右下に表示するようにします。
-                    alignment: Alignment.bottomRight,
-
-                    child: Container(
-                      child: Row(
-                        // MainAxisSize.min を与えると必要最小限のサイズに縮小します。
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // 何の数字かわからないので 👍 アイコンを追加します。
-                          const Icon(
-                            Icons.thumb_up_alt_outlined,
-                            size: 14,
-                            color: Color.fromARGB(255, 190, 228, 19),
-                          ),
-                          Text('${image['likes']}',
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.yellow)),
-                        ],
+              child: Container(
+                padding: const EdgeInsets.all(4.0),
+                child: Stack(
+                  // StackFit.expand を与えると領域いっぱいに広がろうとします。
+                  fit: StackFit.expand,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16.0),
+                        child: Image.network(
+                          image['previewURL'],
+                          // BoxFit.cover を与えると領域いっぱいに広がろうとします。
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    Align(
+                      // 左上ではなく右下に表示するようにします。
+                      alignment: Alignment.bottomRight,
+
+                      child: Container(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Row(
+                            // MainAxisSize.min を与えると必要最小限のサイズに縮小します。
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // 何の数字かわからないので 👍 アイコンを追加します。
+                              const Icon(
+                                Icons.thumb_up_alt_outlined,
+                                size: 14,
+                                color: Color.fromARGB(255, 190, 228, 19),
+                              ),
+                              Text('${image['likes']}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.yellow,
+                                  )),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ));
         },
       ),
