@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -5,111 +6,113 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return const MaterialApp(
+      home: PixabayPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class PixabayPage extends StatefulWidget {
+  const PixabayPage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<PixabayPage> createState() => _PixabayPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _PixabayPageState extends State<PixabayPage> {
+  List imageList = [];
+  String text = '';
+  // 非同期の関数になったため返り値の型にFutureがつき、さらに async キーワードが追加されました。
+  Future<void> fetchImages(String text) async {
+    // await で待つことで Future が外れ Response 型のデータを受け取ることができました。
+    Response response = await Dio().get(
+      'https://pixabay.com/api/?key=28018829-1f49c734f93a897d5847ff437&q=$text&image_type=photo&pretty=true',
+    );
+    print("hello");
+    print(
+        "-------------------------------------------------------------------");
+    print(response);
+    print(
+        "-------------------------------------------------------------------");
+    print(response.data['hits']);
+    imageList = response.data['hits'];
+    setState(() {});
+  }
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  // この関数の中の処理は初回に一度だけ実行されます。
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchImages('cat');
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+        title: TextFormField(
+          decoration: InputDecoration(
+            fillColor: Colors.white,
+            filled: true,
+          ),
+          onFieldSubmitted: (text) {
+            fetchImages(text);
+          },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3, // 横に並べる個数をここで決めます。今回は 3 にします。
+        ),
+        // itemCount には要素数を与えます。
+        // List の要素数は .length で取得できます。今回は20になります。
+        itemCount: imageList.length,
+        // index には 0 ~ itemCount - 1 の数が順番に入ってきます。
+        // 今回、要素数は 20 なので 0 ~ 19 が順番に入ります。
+        itemBuilder: (context, index) {
+          // 要素を順番に取り出します。
+          // index には 0 ~ 19 の値が順番に入ること、
+          // List から番号を指定して要素を取り出す書き方を思い出しながら眺めてください。
+          Map<String, dynamic> image = imageList[index];
+          // プレビュー用の画像データがあるURLは previewURL の value に入っています。
+          // URLをつかった画像表示は Image.network(表示したいURL) で実装できます。
+          return Stack(
+            // StackFit.expand を与えると領域いっぱいに広がろうとします。
+            fit: StackFit.expand,
+            children: [
+              Image.network(
+                image['previewURL'],
+                // BoxFit.cover を与えると領域いっぱいに広がろうとします。
+                fit: BoxFit.cover,
+              ),
+              Align(
+                // 左上ではなく右下に表示するようにします。
+                alignment: Alignment.bottomRight,
+                child: Container(
+                  child: Row(
+                    // MainAxisSize.min を与えると必要最小限のサイズに縮小します。
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 何の数字かわからないので 👍 アイコンを追加します。
+                      const Icon(
+                        Icons.thumb_up_alt_outlined,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                      Text('${image['likes']}',
+                          style: TextStyle(fontSize: 14, color: Colors.white)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
