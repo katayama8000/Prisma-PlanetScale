@@ -32,8 +32,14 @@ class _PixabayPageState extends State<PixabayPage> {
   // 非同期の関数になったため返り値の型にFutureがつき、さらに async キーワードが追加されました。
   Future<void> fetchImages(String text) async {
     // await で待つことで Future が外れ Response 型のデータを受け取ることができました。
-    Response response = await Dio().get(
-      'https://pixabay.com/api/?key=28018829-1f49c734f93a897d5847ff437&q=$text&image_type=photo&pretty=true',
+    final response = await Dio().get(
+      'https://pixabay.com/api',
+      queryParameters: {
+        'key': '28018829-1f49c734f93a897d5847ff437',
+        'q': text,
+        'image_type': 'photo',
+        'per_page': 100,
+      },
     );
     print("hello");
     print(
@@ -44,6 +50,26 @@ class _PixabayPageState extends State<PixabayPage> {
     print(response.data['hits']);
     imageList = response.data['hits'];
     setState(() {});
+  }
+
+  Future<void> shareImage(String url) async {
+    // まずは一時保存に使えるフォルダ情報を取得します。
+    // Future 型なので await で待ちます
+    final dir = await getTemporaryDirectory();
+
+    final response = await Dio().get(
+      url,
+      options: Options(
+        // 画像をダウンロードするときは ResponseType.bytes を指定します。
+        responseType: ResponseType.bytes,
+      ),
+    );
+    // フォルダの中に image.png という名前でファイルを作り、そこに画像データを書き込みます。
+    final imageFile =
+        await File('${dir.path}/image.png').writeAsBytes(response.data);
+
+    // path を指定すると share できます。
+    await Share.shareFiles([imageFile.path]);
   }
 
   // この関数の中の処理は初回に一度だけ実行されます。
@@ -87,25 +113,7 @@ class _PixabayPageState extends State<PixabayPage> {
 
           return InkWell(
               onTap: () async {
-                // まずは一時保存に使えるフォルダ情報を取得します。
-                // Future 型なので await で待ちます
-                Directory dir = await getTemporaryDirectory();
-
-                Response response = await Dio().get(
-                  // previewURL は荒いためより高解像度の webformatURL から画像をダウンロードします。
-                  image['webformatURL'],
-                  options: Options(
-                    // 画像をダウンロードするときは ResponseType.bytes を指定します。
-                    responseType: ResponseType.bytes,
-                  ),
-                );
-
-                // フォルダの中に image.png という名前でファイルを作り、そこに画像データを書き込みます。
-                File imageFile = await File('${dir.path}/image.png')
-                    .writeAsBytes(response.data);
-
-                // path を指定すると share できます。
-                await Share.shareFiles([imageFile.path]);
+                shareImage(image['webformatURL']);
               },
               child: Stack(
                 // StackFit.expand を与えると領域いっぱいに広がろうとします。
