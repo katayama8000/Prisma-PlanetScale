@@ -41,13 +41,6 @@ class _PixabayPageState extends State<PixabayPage> {
         'per_page': 100,
       },
     );
-    print("hello");
-    print(
-        "-------------------------------------------------------------------");
-    print(response);
-    print(
-        "-------------------------------------------------------------------");
-    print(response.data['hits']);
     imageList = response.data['hits'];
     setState(() {});
   }
@@ -75,7 +68,6 @@ class _PixabayPageState extends State<PixabayPage> {
   // この関数の中の処理は初回に一度だけ実行されます。
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     fetchImages('cat');
   }
@@ -85,7 +77,7 @@ class _PixabayPageState extends State<PixabayPage> {
     return Scaffold(
       appBar: AppBar(
         title: TextFormField(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             fillColor: Colors.white,
             filled: true,
           ),
@@ -122,7 +114,7 @@ class _PixabayPageState extends State<PixabayPage> {
                   fit: StackFit.expand,
                   children: [
                     Container(
-                      decoration: BoxDecoration(),
+                      decoration: const BoxDecoration(),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16.0),
                         child: Image.network(
@@ -150,7 +142,7 @@ class _PixabayPageState extends State<PixabayPage> {
                                 color: Color.fromARGB(255, 190, 228, 19),
                               ),
                               Text('${image['likes']}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.yellow,
                                   )),
