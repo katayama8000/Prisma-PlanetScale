@@ -1,38 +1,64 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Next.js Starter App for Netlify
+
+## Overview
+
+This README will guide you in getting up and running with Next.js starter app with authentication [NextAuth.js](https://next-auth.js.org/) and deployed on Netlify. Immediately, you can allow users to sign up or login to your app, including a built-in admin panel with a users table (powered by [PlanetScale](https://planetscale.com)).
+
+We have configured this template for you to one-click deploy directly to Netlify. Alternatively, you can manually deploy to your choice of hosting platform for Next.js applications. For more information on why we created this starter app, read me more in our [blog post](https://planetscale.com/blog/nextjs-netlify-planetscale-starter-app).
+
+[🖼 Live Demo](https://nextjs-planetscale-starter.netlify.app/)
+
+![Example login screen](https://cdn.sanity.io/images/f1avhira/production/9767f106ce5d17f93054ba6ee8a930c546283348-2874x1586.png)
+
+## 🥞 Stack
+
+- Framework - [Next.js v12](https://nextjs.org)
+- Language - [TypeScript](https://www.typescriptlang.org/)
+- Auth - [NextAuth.js](https://next-auth.js.org/)
+- Database - [PlanetScale](https://planetscale.com)
+- ORM - [Prisma](https://prisma.io)
+- Hosting - [Netlify](https://netlify.com)
+- Styling - [TailwindCSS](https://tailwindcss.com)
 
 ## Getting Started
 
-First, run the development server:
+To follow along with this guide, you'll need the following:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+- A [free PlanetScale account](https://auth.planetscale.com/sign-up)
+- The [PlanetScale CLI](https://github.com/planetscale/cli#installation)
+- [Yarn](https://yarnpkg.com/getting-started/install)
+- [Node (LTS)](https://nodejs.org/en/)
+- A [free Netlify account](https://app.netlify.com/signup)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### One-click Deploy with Netlify (recommended)
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+The one-click deploy button allows you to connect Netlify to your GitHub account to clone the nextjs-planetscale-starter repository and automatically deploy it. Be sure to sign up for a Netlify account before clicking the deploy button.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+[![Deploy to Netlify button](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/planetscale/nextjs-planetscale-starter)
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+Once you click the button, you'll be taken to Netlify’s direct deploy page with the pre-built project’s repository passed as a parameter in the URL. Click the "Connect to GitHub" button to authorize access.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Next, you'll be asked to configure your site variables. For the Secret value, navigate to [https://generate-secret.now.sh/32](https://generate-secret.now.sh/32) to generate a secret and then paste that in. You can leave the Database URL and NextAuth URL values blank for now. Click "Save & Deploy".
 
-## Learn More
+Your site will take about a minute to build and then you'll be taken to a settings page. A unique Netlify URL will be generated for the project. You can click that now to see your live site!
 
-To learn more about Next.js, take a look at the following resources:
+**Important:** Once the site is deployed, [follow these steps](https://planetscale.com/docs/tutorials/nextjs-planetscale-netlify-template) to get your PlanetScale database up and running.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> Note: If you do not follow the steps to get your database set up, you will see a 500 error on your live site.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Admin accounts
 
-## Deploy on Vercel
+Admin accounts have access to `/admin`, which contains a user dashboard (powered by PlanetScale). This dashboard is a great starting place to build out an admin dashboard for your app.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+![Example users table](https://cdn.sanity.io/images/f1avhira/production/e2f1b5c5d47887315b2fa17f4039ee9c638e798e-2876x1588.png)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Caveats
+
+This application is close to production ready, but there are a few things you will need to consider and implement.
+
+#### What's not in this starter app?
+
+- **Email Sending & Password Resets:**
+We've left this implementation up to the user because we did not want to make adding an email provider a requirement. The default `VerificationToken` schema has the basics required for implementing sign up verification, or password reset requests.
+- **API Security:** Although NextAuth.js can be used for authentication, it does not provide authorization out of the box. The application comes with and example of protecting API routes using NextAuth.js. It does not cover things like making sure only administrators can access certain routes or making sure that only a user is able to update their account.
+- **Multiple admin accounts**
