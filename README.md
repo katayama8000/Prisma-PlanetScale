@@ -1,64 +1,123 @@
-# Next.js Starter App for Netlify
+# Next.js starter
 
-## Overview
+This is a [Next.js](https://nextjs.org/) project that uses [Prisma](https://www.prisma.io/) to connect to a [PlanetScale](https://planetscale.com/) database and [Tailwind CSS](https://tailwindcss.com/) for styling.
 
-This README will guide you in getting up and running with Next.js starter app with authentication [NextAuth.js](https://next-auth.js.org/) and deployed on Netlify. Immediately, you can allow users to sign up or login to your app, including a built-in admin panel with a users table (powered by [PlanetScale](https://planetscale.com)).
+## Prerequisites
 
-We have configured this template for you to one-click deploy directly to Netlify. Alternatively, you can manually deploy to your choice of hosting platform for Next.js applications. For more information on why we created this starter app, read me more in our [blog post](https://planetscale.com/blog/nextjs-netlify-planetscale-starter-app).
+- [Node.js](https://nodejs.org/en/download/)
+- [PlanetScale CLI](https://github.com/planetscale/cli)
+- Authenticate the CLI with the following command:
 
-[🖼 Live Demo](https://nextjs-planetscale-starter.netlify.app/)
+```sh
+pscale auth login
+```
 
-![Example login screen](https://cdn.sanity.io/images/f1avhira/production/9767f106ce5d17f93054ba6ee8a930c546283348-2874x1586.png)
+## Set up the database
 
-## 🥞 Stack
+Create a new database with the following command:
 
-- Framework - [Next.js v12](https://nextjs.org)
-- Language - [TypeScript](https://www.typescriptlang.org/)
-- Auth - [NextAuth.js](https://next-auth.js.org/)
-- Database - [PlanetScale](https://planetscale.com)
-- ORM - [Prisma](https://prisma.io)
-- Hosting - [Netlify](https://netlify.com)
-- Styling - [TailwindCSS](https://tailwindcss.com)
+```sh
+pscale database create <DATABASE_NAME>
+```
 
-## Getting Started
+> A branch, `main`, was automatically created when you created your database, so you can use that for `BRANCH_NAME` in the steps below.
 
-To follow along with this guide, you'll need the following:
+## Set up the starter Next.js app
 
-- A [free PlanetScale account](https://auth.planetscale.com/sign-up)
-- The [PlanetScale CLI](https://github.com/planetscale/cli#installation)
-- [Yarn](https://yarnpkg.com/getting-started/install)
-- [Node (LTS)](https://nodejs.org/en/)
-- A [free Netlify account](https://app.netlify.com/signup)
+Clone the starter repository.
 
-### One-click Deploy with Netlify (recommended)
+```sh
+git clone https://github.com/planetscale/nextjs-starter
+```
 
-The one-click deploy button allows you to connect Netlify to your GitHub account to clone the nextjs-planetscale-starter repository and automatically deploy it. Be sure to sign up for a Netlify account before clicking the deploy button.
+Install the dependencies.
 
-[![Deploy to Netlify button](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/planetscale/nextjs-planetscale-starter)
+```sh
+npm install
+```
 
-Once you click the button, you'll be taken to Netlify’s direct deploy page with the pre-built project’s repository passed as a parameter in the URL. Click the "Connect to GitHub" button to authorize access.
+Next, you'll need to create a database username and password through the CLI to connect to your application. If you'd prefer to use the dashboard for this step, you can find those instructions in the [Connection Strings documentation](/concepts/connection-strings#creating-a-password) and then come back here to finish setup.
 
-Next, you'll be asked to configure your site variables. For the Secret value, navigate to [https://generate-secret.now.sh/32](https://generate-secret.now.sh/32) to generate a secret and then paste that in. You can leave the Database URL and NextAuth URL values blank for now. Click "Save & Deploy".
+First, create your `.env` file by renaming the `.env.example` file to `.env`:
 
-Your site will take about a minute to build and then you'll be taken to a settings page. A unique Netlify URL will be generated for the project. You can click that now to see your live site!
+```sh
+mv .env.example .env
+```
 
-**Important:** Once the site is deployed, [follow these steps](https://planetscale.com/docs/tutorials/nextjs-planetscale-netlify-template) to get your PlanetScale database up and running.
+Next, using the PlanetScale CLI, create a new username and password for the branch of your database:
 
-> Note: If you do not follow the steps to get your database set up, you will see a 500 error on your live site.
+```sh
+pscale password create <DATABASE_NAME> <BRANCH_NAME> <PASSWORD_NAME>
+```
 
-## Admin accounts
+> The `PASSWORD_NAME` value represents the name of the username and password being generated. You can have multiple credentials for a branch, so this gives you a way to categorize them. To manage your passwords in the dashboard, go to your database overview page, click "Settings", and then click "Passwords".
 
-Admin accounts have access to `/admin`, which contains a user dashboard (powered by PlanetScale). This dashboard is a great starting place to build out an admin dashboard for your app.
+Take note of the values returned to you, as you won't be able to see this password again.
 
-![Example users table](https://cdn.sanity.io/images/f1avhira/production/e2f1b5c5d47887315b2fa17f4039ee9c638e798e-2876x1588.png)
+```text
+Password production-password was successfully created.
+Please save the values below as they will not be shown again
 
-## Caveats
+  NAME                  USERNAME       ACCESS HOST URL                     ROLE               PLAIN TEXT
+ --------------------- -------------- ----------------------------------- ------------------ -------------------------------------------------------
+  production-password   xxxxxxxxxxxxx   xxxxxx.us-east-2.psdb.cloud   Can Read & Write   pscale_pw_xxxxxxx
+```
 
-This application is close to production ready, but there are a few things you will need to consider and implement.
+You'll use these properties to construct your connection string, which will be the value for `DATABASE_URL` in your `.env` file. Update the `DATABASE_URL` property with your connection string in the following format:
 
-#### What's not in this starter app?
+```text
+mysql://<USERNAME>:<PLAIN_TEXT_PASSWORD>@<ACCESS_HOST_URL>/<DATABASE_NAME>?sslaccept=strict
+```
 
-- **Email Sending & Password Resets:**
-We've left this implementation up to the user because we did not want to make adding an email provider a requirement. The default `VerificationToken` schema has the basics required for implementing sign up verification, or password reset requests.
-- **API Security:** Although NextAuth.js can be used for authentication, it does not provide authorization out of the box. The application comes with and example of protecting API routes using NextAuth.js. It does not cover things like making sure only administrators can access certain routes or making sure that only a user is able to update their account.
-- **Multiple admin accounts**
+Push the database schema to your PlanetScale database using Prisma.
+
+`npx prisma db push`
+
+Run the seed script to populate your database with `Product` and `Category` data.
+
+`npm run seed`
+
+## Run the App
+
+Run the app with following command:
+
+`npm run dev`
+
+Open your browser at [localhost:3000](localhost:3000) to see the running application.
+
+## Deploying
+
+After you've got your application running locally, it's time to deploy it. To do so, you'll need to promote your database branch (`main` by default) to be the production branch ([read the branching documentation for more information](https://planetscale.com/docs/concepts/branching)).
+
+```sh
+pscale branch promote <DATABASE_NAME> <BRANCH_NAME>
+```
+
+Now that your branch has been promoted to production, you can either use the existing password you generated earlier for running locally or create a new password. Regardless, you'll need a password in the deployment steps below.
+
+Choose one of the following deploy buttons and make sure to update the `DATABASE_URL` variable during this setup process.
+
+### Deploy on Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/planetscale/nextjs-starter&env=DATABASE_URL)
+
+### Deploy on Netlify
+
+\*Note: The `Netlify.toml` file in this repository includes the configuration for you to customize the `DATABASE_URL` property on the initial deploy.
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/planetscale/nextjs-starter)
+
+## Learn More
+
+To learn more about PlanetScale, take a look at the following resources:
+
+- [PlanetScale quick start guide](https://planetscale.com/docs/tutorials/planetscale-quick-start-guide) - Learn how to get started with PlanetScale.
+
+## What's next?
+
+Learn more about how PlanetScale allows you to make [non-blocking schema changes](https://planetscale.com/docs/concepts/nonblocking-schema-changes) to your database tables without locking or causing downtime for production databases. If you're interested in learning how to secure your application when connecting to PlanetScale,
+please read [Connecting to PlanetScale securely](/reference/planetscale-security).
+
+## Need help?
+
+Get help from [PlanetScale's support team](https://www.planetscale.com/support), or join our [GitHub Discussion board](https://github.com/planetscale/beta/discussions) to see how others are using PlanetScale.
