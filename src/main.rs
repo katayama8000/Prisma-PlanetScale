@@ -5,23 +5,33 @@ use std::net::SocketAddr;
 use axum::{
     extract::{Path, Query},
     response::{Html, IntoResponse},
-    routing::get,
+    routing::{get, get_service, Route},
     Router,
 };
 use serde::Deserialize;
+use tower_http::services::ServeDir;
 
 #[tokio::main]
 async fn main() {
-    let routers_hello = Router::new()
-        .route("/hello", get(handler_hello))
-        .route("/hello/:name", get(handler_hello2));
-
+    let routers_all = Router::new()
+        .merge(routes_hello())
+        .fallback_service(route_static());
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     println!("->> listening on {}", addr);
     axum::Server::bind(&addr)
-        .serve(routers_hello.into_make_service())
+        .serve(routers_all.into_make_service())
         .await
         .unwrap()
+}
+
+fn route_static() -> Router {
+    Router::new().nest_service("/", get_service(ServeDir::new("./")))
+}
+
+fn routes_hello() -> Router {
+    Router::new()
+        .route("/hello", get(handler_hello))
+        .route("/hello/:name", get(handler_hello2))
 }
 
 #[derive(Debug, Deserialize)]
