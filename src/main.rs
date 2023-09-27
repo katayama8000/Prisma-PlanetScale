@@ -27,9 +27,16 @@ struct HelloParams {
     name: Option<String>,
 }
 
-async fn handler_hello() -> impl IntoResponse {
-    println!("handler hello");
-    Html("Hello World")
+async fn handler_hello(Query(params): Query<HelloParams>) -> impl IntoResponse {
+    // println!("handler hello - {params:?}");
+    // let name = params.name.as_deref().unwrap_or("world");
+    // println!("{}", name);
+    // // Html("Hello World");
+    // Html(format!("Hello<strong>{name}</strong>"));
+    println!("handler hello - {params:?}");
+    let name = params.name.as_deref().unwrap_or("world");
+    println!("{}", name);
+    Html(format!("Hello<strong>{name}</strong>"))
 }
 
 // async fn handler_hello(Query(params): Query<HelloParams>) -> impl IntoResponse {
