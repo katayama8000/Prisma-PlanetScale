@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+pub use self::error::{Error, Result};
 use std::net::SocketAddr;
 
 use axum::{
@@ -11,12 +12,16 @@ use axum::{
 use serde::Deserialize;
 use tower_http::services::ServeDir;
 
+mod error;
+mod web;
+
 #[tokio::main]
 async fn main() {
     let routers_all = Router::new()
         .merge(routes_hello())
+        .merge(web::routes_login::routes())
         .fallback_service(route_static());
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let addr = SocketAddr::from(([127, 0, 0, 1], 8088));
     println!("->> listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(routers_all.into_make_service())
