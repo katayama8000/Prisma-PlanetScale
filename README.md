@@ -9,3 +9,13 @@ cargo watch -q -c -w src/ -x run
 ```bash
 cargo watch -q -c -w tests/ -x "test -q quick_dev -- --nocapture"
 ```
+
+### 使用中ポートの調べ方
+```bash
+sudo lsof -P -i:8088
+```
+
+### ポートの開け方
+```bash
+sudo kill 11881  
+```

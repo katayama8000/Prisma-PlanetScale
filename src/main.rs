@@ -5,11 +5,13 @@ use std::net::SocketAddr;
 
 use axum::{
     extract::{Path, Query},
-    response::{Html, IntoResponse},
+    middleware,
+    response::{Html, IntoResponse, Response},
     routing::{get, get_service, Route},
     Router,
 };
 use serde::Deserialize;
+use tower_cookies::{CookieManager, CookieManagerLayer};
 use tower_http::services::ServeDir;
 
 mod error;
@@ -20,6 +22,8 @@ async fn main() {
     let routers_all = Router::new()
         .merge(routes_hello())
         .merge(web::routes_login::routes())
+        .layer(middleware::map_response(main_response_wrapper))
+        .layer(CookieManagerLayer::new())
         .fallback_service(route_static());
     let addr = SocketAddr::from(([127, 0, 0, 1], 8088));
     println!("->> listening on {}", addr);
@@ -27,6 +31,11 @@ async fn main() {
         .serve(routers_all.into_make_service())
         .await
         .unwrap()
+}
+
+async fn main_response_wrapper(res: Response) -> Response {
+    println!("main_response_wrapper");
+    res
 }
 
 fn route_static() -> Router {
