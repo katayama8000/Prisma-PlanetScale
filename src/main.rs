@@ -15,6 +15,7 @@ use tower_cookies::{CookieManager, CookieManagerLayer};
 use tower_http::services::ServeDir;
 
 mod error;
+mod model;
 mod web;
 
 #[tokio::main]
