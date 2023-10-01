@@ -39,7 +39,7 @@ impl ModelController {
         Ok(ticket)
     }
 
-    pub async fn list_ticket(&self) -> Result<Vec<Ticket>> {
+    pub async fn list_tickets(&self) -> Result<Vec<Ticket>> {
         let store = self.tickets_store.lock().unwrap();
         let tickets = store.iter().filter_map(|t| t.clone()).collect();
         Ok(tickets)

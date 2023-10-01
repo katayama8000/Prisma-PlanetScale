@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use crate::model::ModelController;
+
 pub use self::error::{Error, Result};
 use std::net::SocketAddr;
 
@@ -19,10 +21,12 @@ mod model;
 mod web;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
+    let mc = ModelController::new().await?;
     let routers_all = Router::new()
         .merge(routes_hello())
         .merge(web::routes_login::routes())
+        .nest("/api", web::routes_tickets::routes(mc.clone()))
         .layer(middleware::map_response(main_response_wrapper))
         .layer(CookieManagerLayer::new())
         .fallback_service(route_static());
@@ -31,7 +35,9 @@ async fn main() {
     axum::Server::bind(&addr)
         .serve(routers_all.into_make_service())
         .await
-        .unwrap()
+        .unwrap();
+
+    Ok(())
 }
 
 async fn main_response_wrapper(res: Response) -> Response {
