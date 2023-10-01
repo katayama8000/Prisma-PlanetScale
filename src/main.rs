@@ -43,12 +43,12 @@ async fn main() -> Result<()> {
 }
 
 async fn main_response_wrapper(res: Response) -> Response {
-    println!("main_response_wrapper");
+    // println!("main_response_wrapper");
     res
 }
 
 async fn main_response_wrapper2(res: Response) -> Response {
-    println!("main_response_wrapper2");
+    // println!("main_response_wrapper2");
     res
 }
 

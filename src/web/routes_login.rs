@@ -14,7 +14,7 @@ async fn api_login(cookies: Cookies, payload: Json<LoginPayload>) -> Result<Json
         return Err(Error::LoginFail);
     }
 
-    cookies.add(Cookie::new(web::AUTH_TOKEN, "user-1.exp.siginin"));
+    cookies.add(Cookie::new(web::AUTH_TOKEN, "user-1.exp.sign"));
 
     let body = Json(json!({
         "result":{
