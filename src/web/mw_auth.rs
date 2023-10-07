@@ -13,13 +13,14 @@ use crate::web::AUTH_TOKEN;
 
 use crate::{Error, Result};
 
-pub async fn mw_requier<B>(cookies: Cookies, req: Request<B>, next: Next<B>) -> Result<Response> {
+pub async fn mw_requier<B>(
+    ctx: Result<Ctx>,
+    cookies: Cookies,
+    req: Request<B>,
+    next: Next<B>,
+) -> Result<Response> {
     println!("->> {:<12} - mw_require_auth", "MIDDLEWARE");
-
-    let auth_token = cookies.get(AUTH_TOKEN).map(|c| c.to_string());
-    let (user_id, exp, sign) = auth_token
-        .ok_or(Error::AuthFailNoAuthToken)
-        .and_then(parse_token)?;
+    ctx?;
     Ok(next.run(req).await)
 }
 
@@ -39,7 +40,6 @@ fn parse_token(token: String) -> Result<(u64, String, String)> {
     Ok((user_id, exp.to_string(), sign.to_string()))
 }
 
-#[async_trait]
 #[async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for Ctx {
     type Rejection = Error;
