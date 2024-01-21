@@ -28,6 +28,7 @@ async fn main() -> Result<()> {
     let routers_all = Router::new()
         .merge(routes_hello())
         .merge(web::routes_login::routes())
+        .route("/sample", get(handler_hello))
         .nest("/api", routes_api)
         .layer(middleware::map_response(main_response_wrapper))
         .layer(middleware::map_response(main_response_wrapper2))
